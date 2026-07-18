@@ -8,7 +8,7 @@ export default function BottomBanner() {
           alt="Industrial Banner"
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUUM53LJyXY4oqxmoRRiNOoTMGwugOqo-B9aTa-iVNd5YHFZI6Qw2egvDtdVXkR7JBwwJTyX3fR3n_IrJZ-7oyVyu5evreUFAp1Yg3Q_OSmGqrPSoS-tc9my73R9X62SGOEOp-hZzmwxaZ5ULXIB68sK0eTi12zfYdVNsfrx7yT4Bb04FvK7Z6DLS6Vh1oEA_C3XFTlSPH_3zU4GtpEuKkymwa8IBqVY-v5IvIs7Lg9IdNt5HeEzQ3U3HnJRWIILJkv5ASy_X_hDY"
           fill
-          sizes="100vw"
+          sizes="(max-width: 768px) 100vw, 100vw"
           className="object-cover opacity-40 mix-blend-luminosity"
         />
         <div className="absolute inset-0 bg-black/60"></div>

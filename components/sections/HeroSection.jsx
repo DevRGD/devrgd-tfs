@@ -1,86 +1,190 @@
+'use client';
+import { useRef } from 'react';
 import Image from 'next/image';
 import CountryCard from '../ui/CountryCard';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export default function HeroSection() {
-  const topRow = [
-    {
-      name: 'India',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuAthkxotFO2WhgT9oXnXdQkYkIFPKY2nOZ581v4AfSbPBJUVH3YbqmqXRKJW-zXcGV3zGbTgKhCG9qXd3zGfcyZ3w3hiWvE8xx012UxlU32Y4eT5k7benQuYBf7Cd_UpLtYUXZpUd1I4m5Zlx7TRZT-3gigvwJrcSs_zm0vAhi9NYdx8-2SkxcfwMqMlQpDbU8SjPukrUoKRQDeRKPyXcSDNxqVovnw6zzi7sUwgsgEOjs2xFI6TLVLv08a4p7XXmFbD4ffE_0BKLY',
-    },
-    {
-      name: 'Dubai',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuACKyAxEEsShwklfg9YLyG0lRKe8UciXPPmEWfvj4E3EDpPXb6K-1ZHufmyUmjEtQzM7ETKs8n0KW_SXUACjGWPROBaBS6HlGPvsaKzEkjhlUluil8FVxQvvmjxWl5Vs5yhz5k5KiZPBlriX9YELYNmsVodvVlXN_wzthjrjpoUbZUNSllbg0TlSN_C4hjumYjI12BLArXC2no9QP_PE3DhdiAz1Ms22xpsT_HoRQo54KDPQmr0OPfUX7Z-YhDYMoobTEuyWvccscU',
-    },
-    {
-      name: 'South Africa',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBm--DO-foynwKydGwnjr3ipLkBqYXsUEFxHTHNddqtc5vOoFX5X-yLSH368WHddqav6278_hSzq4PIaI_3lR4NSGx_-pCnO28XJGSICGuQZs4PuhXV1iQJ9AdCRwaosuMJOO7KeqtOxv8tLlaTV8GroAvnYwme6syZl3M_NGWA5ZhpbptuJAJe2N3DEoAN2sR6VULyy8WtX4SUMxTFZX9RL0LMC8-oQPucYVeVs_iNUgwCyMztxyGDE8IdLnzbiM9tLjoiW_YDOLY',
-    },
-    {
-      name: 'Germany',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBzvtuVvFmkpVFc-_MjVzz1tfOmNYE6SlTA1FGqsjhx6OTJue8irkDdhjHPHyf0dzsKifdZsMIMnseEWtNQit79pOLd9gS-uF3LzUEee-xNsVZtmRxJaUtUEyHbnj8Ne1e1Kg2_vjpAXcSnRv4C55QroAe2hh4sK3eK1s6t4iEviyL7XwQZElL7fqlSu4UCMXCl_2x79fE8IvIkT42y4a5UTHsnjSvyr4sD7IrFY6t4ZMp6EoAr4z0gHlLg1ECAU9CAw-vT6OOjjq4',
-    },
+  const allCountries = [
+    { name: 'Afghanistan', image: '/maps/Afganistan.png' },
+    { name: 'Australia', image: '/maps/Austrila.png' },
+    { name: 'Azerbaijan', image: '/maps/Azerbaijan.png' },
+    { name: 'Bangladesh', image: '/maps/Bangladesh.png' },
+    { name: 'Brazil', image: '/maps/Brazile.png' },
+    { name: 'DCR', image: '/maps/DCR.png' },
+    { name: 'India', image: '/maps/India.png' },
+    { name: 'Kenya', image: '/maps/Keneya.png' },
+    { name: 'Myanmar', image: '/maps/Mayanmar.png' },
+    { name: 'Nigeria', image: '/maps/Nigeria.png' },
+    { name: 'South Africa', image: '/maps/South africa.png' },
+    { name: 'Sudan', image: '/maps/Sudan.png' },
+    { name: 'Tanzania', image: '/maps/Tanzania.png' },
+    { name: 'Canada', image: '/maps/canada.png' },
+    { name: 'Dubai', image: '/maps/dubai.png' },
+    { name: 'Germany', image: '/maps/germaney.png' },
+    { name: 'Ivory Coast', image: '/maps/ivory cost.png' },
+    { name: 'Zambia', image: '/maps/zambia.png' },
   ];
 
-  const bottomRow = [
-    {
-      name: 'Brazil',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDzEk3OwoI9UeP6shResDwxYtdcMGmt_OpsvlJfyGrr5roIlxNSCVGTO0gIzzri0YRlXBOO0ZriylMmDME1xGBQRQ4KuJWji1c0frg61DxshynkqTvioBtN9dbgD5Agmzq-kqX_5SMJrg1Rci9mHR3knNuQFTEL0uLi276v02rk6BJyyia6WbHmKocmRcP7QA9xhOoz34XIqC3NCYEIuzSE6OJxQlsThB9pKkmkzF0vsMSf9LyAoVH86oj990bSlnv6r3neWf8WJpg',
-      flag: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD92xp8zzFgJMfY3cgZttkl6akQwyNreXGoEWeF_9XzNZZDaPCltUKJTSTG7sYywMFdjPhWQNzvR_NCRxEaXuSFO0gmWHFXGMkNo21zSalVzhXCRHrXNOUhqUCPIP3i_orv060ydLj8bm5n7DZh7v_kiw9FgF33izww24NLs3dqKSD8eRz1-xlL2k02tlD1atS_LHrdA7JbvOOYDbqsndrr-J96yVqc90iAkBeyvUXdZvXDlUL-zHbvvTilOhwCr6v99EoQDUYXawA',
+  const topRow = allCountries.slice(0, 9);
+  const bottomRow = allCountries.slice(9, 18);
+
+  const paragraphText =
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida.';
+  const words = paragraphText.split(' ');
+
+  const container = useRef();
+
+  useGSAP(
+    () => {
+      // Infinite Marquees
+      const tlTop = gsap.fromTo(
+        '.marquee-top',
+        { xPercent: -50 },
+        { xPercent: 0, ease: 'none', duration: 45, repeat: -1 },
+      );
+      const tlBottom = gsap.fromTo(
+        '.marquee-bottom',
+        { xPercent: 0 },
+        { xPercent: -50, ease: 'none', duration: 45, repeat: -1 },
+      );
+
+      // Initial Text Load Animation
+      gsap.fromTo(
+        '.hero-heading',
+        { x: -100, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1, ease: 'power3.out', delay: 0.2 },
+      );
+
+      gsap.fromTo(
+        '.hero-word',
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, stagger: 0.03, ease: 'power2.out', delay: 0.6 },
+      );
+
+      // ScrollTrigger Animations
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container.current,
+          start: 'top top',
+          end: 'bottom top', // Unpinned, scrubs naturally as it leaves the screen
+          scrub: true,
+          onUpdate: (self) => {
+            // Get scroll velocity and map it to a timeScale multiplier
+            const velocity = Math.abs(self.getVelocity());
+            const newTimeScale = 1 + velocity / 50; // Increased velocity multiplier
+            
+            // Calculate dynamic skew based on velocity (max 25 degrees)
+            const skewAmount = Math.min(velocity / 30, 25); // Increased skew sensitivity and max angle
+
+            // Animate timeScale up based on velocity
+            gsap.to([tlTop, tlBottom], {
+              timeScale: newTimeScale,
+              duration: 0.2,
+              overwrite: 'auto',
+              onComplete: () => {
+                // When scrolling stops, smoothly return to normal speed
+                gsap.to([tlTop, tlBottom], { timeScale: 1, duration: 0.8 });
+              },
+            });
+            
+            // Dynamic Skew: Top row moves right, leans right (-skewAmount)
+            gsap.to('.marquee-top .country-card', {
+              skewX: -skewAmount,
+              duration: 0.2,
+              overwrite: 'auto',
+              onComplete: () => gsap.to('.marquee-top .country-card', { skewX: 0, duration: 0.8 })
+            });
+            gsap.to('.marquee-top .country-card-text', {
+              skewX: skewAmount, // reverse text skew
+              duration: 0.2,
+              overwrite: 'auto',
+              onComplete: () => gsap.to('.marquee-top .country-card-text', { skewX: 0, duration: 0.8 })
+            });
+
+            // Dynamic Skew: Bottom row moves left, leans left (skewAmount)
+            gsap.to('.marquee-bottom .country-card', {
+              skewX: skewAmount,
+              duration: 0.2,
+              overwrite: 'auto',
+              onComplete: () => gsap.to('.marquee-bottom .country-card', { skewX: 0, duration: 0.8 })
+            });
+            gsap.to('.marquee-bottom .country-card-text', {
+              skewX: -skewAmount, // reverse text skew
+              duration: 0.2,
+              overwrite: 'auto',
+              onComplete: () => gsap.to('.marquee-bottom .country-card-text', { skewX: 0, duration: 0.8 })
+            });
+          },
+        },
+      });
+
+      // Parallax Background (Positive yPercent makes it scroll slower than the page)
+      tl.to('.hero-bg', { yPercent: 30, ease: 'none' }, 0);
+
+      // Text Reverse Animation (Using wrapper to avoid conflict)
+      // Heading slides out to the right
+      tl.to('.hero-heading-wrapper', { x: 150, opacity: 0, ease: 'none' }, 0);
+
+      // Paragraph slides back down slightly, word by word from the end
+      tl.to('.hero-word-wrapper', { y: 15, opacity: 0, ease: 'none', stagger: { amount: 0.5, from: 'end' } }, 0);
     },
-    {
-      name: 'zambia',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBFsO9685WrtUq_-oX6dj-qDe6xExU1ipS4tJN0uGnXvgVfWnTvCJKvwm4KD7tr0Gm-NjP30bwiEkNyS8OITRdSvIA5PC6xqovrD8atHRssvc82x2aDGndDBoa84_7HrhZ8jtNEf43KNhm66JK4QsxYFkvbVOfMVFkmVEZJZVx3XR8Gqd5wbwjV6Y9a7KghzP8ahg_VeUZAs-n5v_nLCX0Xbe4oQ9Gb93UvpVtn4t71GQjszrbClvl6sfuNl4v2sBMDhxE4sMHhMN4',
-    },
-    {
-      name: 'Canada',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBsw_ubTbBsoi3wXyb5EGwC0Ouu-mcudPydZt_CaiqIr8naddAJvA_YlXVdMCcOeisBdtfCkfV8ScbZPPfcZroudN46eBV5M_lGwZDSl84ta6tbKn-l-GYIJU1THTKclDT1KdM6kr_vZPtXIJoleMtHXBF33LJbA4Jito2pkxPjX-LpIfkz3doa0qiYvltyl-FwVGt2QVol78BGtL7IEVGa5Pep35kKx7u6Sbczbwqx18mv2NAJVxg2sl9o-Pq8-_CiX77vaAFByHA',
-    },
-    {
-      name: 'Ivory Coast',
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuD8UWFoqm_raG8xZJPksxqLGn7VfWjpOAax3980RAuGDjjj9H8r4i6sPA92wPCTAjH9CeQsywIoeOTsH8mJK3xV52Io0I-MP6-vH9HXzzrCho671wwcI9s2SBTJ1p69GFLm678_oq8Z4IO74a8B9jMBIZxYazDF-ghW3kBtw1JUJVZ6S538LP1ITFO02fJkJ5x0aL3gFEkXFvlZLDmCxZLA8mLTJm0UEhhqzmnAspdtSgh-sCb_Dep33xOL7VrTB0ia1SwxEDLrwLU',
-    },
-  ];
+    { scope: container },
+  );
 
   return (
-    <section className="relative bg-black text-white py-16 md:py-24 min-h-[80vh] flex flex-col justify-center">
-      <div className="absolute inset-0 z-0">
+    <section
+      ref={container}
+      className="relative bg-black text-white min-h-screen pt-45 md:pt-60 pb-12 flex flex-col justify-center overflow-hidden"
+    >
+      <div className="hero-bg absolute inset-0 z-0 h-[130%] top-[-15%]">
         <Image
           alt="Industrial Background"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHXCJgahloKfEDnyQLR3-TWELrnDmGHzlHBbByF5Xl92lfDIkHXkXqtjSPCsIG64FOsI8OFP67z3PV69ohtb6gm2yUTZrJqenLeLSVPSK0Pbx92dIZgGQQkR_HAWSg_JfrW0c7g-bDDK4VyqVz-nr8MBQnIDzCTQdsAYpXKcve54PdcWF6YN3P2JkaItzBLfN9CW_oFVFduohIlifC06ETLQjF-xapi7haxdL5zrV7lw6KwOAv44hq-JRmFK8j66XAlU-dYlH2yUs"
+          src="/images/home-banner.png"
           fill
-          sizes="100vw"
-          className="object-cover opacity-40"
+          className="object-cover opacity-40 mix-blend-overlay"
           priority
         />
-        <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4">
-          {topRow.map((c, i) => (
-            <CountryCard key={i} {...c} />
-          ))}
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 w-full md:w-[85%] mx-auto mb-8">
-          {bottomRow.map((c, i) => (
-            <CountryCard key={i} {...c} />
-          ))}
+      <div className="relative z-10 w-full flex-1 flex flex-col justify-between gap-12">
+        {/* Marquees Top */}
+        <div className="flex flex-col gap-6 w-full">
+          <div className="marquee-top-wrapper w-full overflow-hidden">
+            <div className="marquee-top flex gap-4 w-max">
+              {[...topRow, ...topRow].map((c, i) => (
+                <CountryCard key={`top-${i}`} {...c} priority={i < 5} />
+              ))}
+            </div>
+          </div>
+
+          <div className="marquee-bottom-wrapper w-full overflow-hidden">
+            <div className="marquee-bottom flex gap-4 w-max">
+              {[...bottomRow, ...bottomRow].map((c, i) => (
+                <CountryCard key={`bottom-${i}`} {...c} textPos="left" />
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-24 md:mt-32 px-6 md:px-12 lg:px-16 xl:px-24">
+        {/* Text Area Bottom */}
+        <div className="hero-text-container container mx-auto px-6 md:px-12 lg:px-16 xl:px-24 mb-4 md:mb-8">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Global Presence</h1>
+            <div className="hero-heading-wrapper inline-block">
+              <h1 className="hero-heading text-4xl md:text-5xl font-bold mb-6 tracking-tight opacity-0">
+                Global Presence
+              </h1>
+            </div>
             <p className="text-sm md:text-base text-gray-300 leading-relaxed font-light">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-              dolore magna aliqua. Quis ipsum suspendisse ultrices gravida.
+              {words.map((word, index) => (
+                <span key={index} className="hero-word-wrapper inline-block mr-1">
+                  <span className="hero-word inline-block opacity-0">{word}</span>
+                </span>
+              ))}
             </p>
           </div>
         </div>

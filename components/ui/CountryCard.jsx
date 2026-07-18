@@ -1,23 +1,26 @@
 import Image from 'next/image';
 
-export default function CountryCard({ name, image, flag }) {
+export default function CountryCard({ name, image, priority = false, textPos = 'right' }) {
   return (
-    <div className="relative group overflow-hidden cursor-pointer aspect-4/3 md:aspect-video border border-gray-800">
+    <div className={`country-card relative overflow-hidden cursor-pointer w-[150px] md:w-[200px] shrink-0 aspect-[3/2]`}>
       <Image
         alt={name}
         src={image}
         fill
-        sizes="(max-width: 768px) 50vw, 25vw"
-        className="object-cover transition duration-700 group-hover:scale-110"
+        sizes="280px"
+        className="object-cover scale-[1.15]"
+        priority={priority}
       />
-      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 w-full p-4 flex items-center space-x-2">
-        {flag && (
-          <div className="relative w-6 h-4">
-            <Image alt={`${name} Flag`} src={flag} fill sizes="24px" className="object-cover rounded-sm" />
-          </div>
-        )}
-        <h3 className="text-white text-sm md:text-base font-semibold tracking-wide">{name}</h3>
+      <div 
+        className={`absolute bottom-0 w-full px-3 py-1.5 md:px-4 md:py-2 flex ${
+          textPos === 'left' 
+            ? 'justify-start bg-linear-to-r' 
+            : 'justify-end bg-linear-to-l'
+        } from-black/90 via-black/40 to-transparent`}
+      >
+        <h3 className={`country-card-text text-white text-sm md:text-base font-semibold tracking-wider uppercase`}>
+          {name}
+        </h3>
       </div>
     </div>
   );
