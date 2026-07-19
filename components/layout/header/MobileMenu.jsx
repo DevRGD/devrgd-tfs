@@ -15,8 +15,8 @@ export default function MobileMenu({ isMobileMenuOpen, setIsMobileMenuOpen }) {
       <div
         className={`sm:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-2xl z-50 transition-all duration-300 ease-in-out ${
           isMobileMenuOpen
-            ? 'opacity-100 visible translate-x-0 pointer-events-auto'
-            : 'opacity-0 invisible translate-x-8 pointer-events-none'
+            ? 'opacity-100 visible translate-y-0 pointer-events-auto'
+            : 'opacity-0 invisible -translate-y-4 pointer-events-none'
         }`}
       >
         <div className="container mx-auto px-4 py-6 flex flex-col gap-6">
