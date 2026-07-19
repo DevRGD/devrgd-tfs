@@ -3,7 +3,7 @@
 import CountryList from './interactive-globe/CountryList';
 import FacilityCard from './interactive-globe/FacilityCard';
 import Globe from './interactive-globe/Globe';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useInteractiveGlobeTransition } from '@/hooks/useInteractiveGlobeTransition';
 import { globeLocationsData } from '@/data/globeLocationsData';
 import { useGlobeContentTransition } from '@/hooks/useGlobeContentTransition';
@@ -24,13 +24,71 @@ export default function InteractiveGlobeSection() {
   const dragClosestIndexRef = useRef(-1);
   const dragTimeoutRef = useRef(null);
 
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+  const hasInteractedRef = useRef(false);
+  const autoPlayTimeoutRef = useRef(null);
+  const autoPlayIntervalRef = useRef(null);
+
   useInteractiveGlobeTransition(sectionRef);
   const { targetIndex, displayedIndex, changeLocation } = useGlobeContentTransition(sectionRef);
 
-  const handleNext = () => changeLocation((targetIndex + 1) % globeLocationsData.length);
-  const handlePrev = () => changeLocation((targetIndex - 1 + globeLocationsData.length) % globeLocationsData.length);
+  const stopAutoPlay = () => {
+    hasInteractedRef.current = true;
+    setIsAutoPlaying(false);
+    if (autoPlayTimeoutRef.current) clearTimeout(autoPlayTimeoutRef.current);
+    if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!hasInteractedRef.current && !isAutoPlaying) {
+            autoPlayTimeoutRef.current = setTimeout(() => {
+              if (!hasInteractedRef.current) {
+                setIsAutoPlaying(true);
+              }
+            }, 3000);
+          }
+        } else {
+          if (autoPlayTimeoutRef.current) clearTimeout(autoPlayTimeoutRef.current);
+          setIsAutoPlaying(false);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
+    return () => {
+      observer.disconnect();
+      if (autoPlayTimeoutRef.current) clearTimeout(autoPlayTimeoutRef.current);
+    };
+  }, [isAutoPlaying]);
+
+  useEffect(() => {
+    if (isAutoPlaying) {
+      autoPlayIntervalRef.current = setInterval(() => {
+        changeLocation((targetIndex + 1) % globeLocationsData.length);
+      }, 4000);
+    }
+    return () => {
+      if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current);
+    };
+  }, [isAutoPlaying, targetIndex, changeLocation]);
+
+  const handleNext = () => {
+    stopAutoPlay();
+    changeLocation((targetIndex + 1) % globeLocationsData.length);
+  };
+
+  const handlePrev = () => {
+    stopAutoPlay();
+    changeLocation((targetIndex - 1 + globeLocationsData.length) % globeLocationsData.length);
+  };
 
   const handleDragStart = () => {
+    stopAutoPlay();
     setIsDragging(true);
     if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
   };
@@ -60,7 +118,10 @@ export default function InteractiveGlobeSection() {
     >
       <CountryList
         activeIndex={targetIndex}
-        onSelect={changeLocation}
+        onSelect={(idx) => {
+          stopAutoPlay();
+          changeLocation(idx);
+        }}
         data={globeLocationsData}
         displayedIndex={displayedIndex}
       />
