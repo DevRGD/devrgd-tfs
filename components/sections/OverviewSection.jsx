@@ -33,6 +33,7 @@ export default function OverviewSection() {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 45vw"
+              preload={true}
             />
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-black">

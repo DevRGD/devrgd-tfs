@@ -33,6 +33,7 @@ export default function BrandsTimelineSection() {
                 fill
                 sizes="(max-width: 768px) 280px, 240px"
                 className="object-cover"
+                preload={true}
               />
             </div>
 
@@ -87,6 +88,7 @@ export default function BrandsTimelineSection() {
                       fill
                       sizes="128px"
                       className="object-contain"
+                      preload={true}
                     />
                   </div>
                 </div>

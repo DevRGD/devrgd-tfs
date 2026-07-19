@@ -25,6 +25,7 @@ export default function BottomBanner() {
           fill
           sizes="(max-width: 768px) 100vw, 100vw"
           className="object-cover opacity-40 mix-blend-luminosity"
+          preload={true}
         />
         <div className="absolute inset-0 bg-black/10"></div>
       </div>

@@ -31,6 +31,7 @@ export default function MegaMenu({ isMegaMenuOpen, activeSector, setActiveSector
                       fill
                       sizes="80px"
                       className="object-contain mix-blend-multiply"
+                      preload={true}
                     />
                   </div>
                 </li>
@@ -76,6 +77,7 @@ export default function MegaMenu({ isMegaMenuOpen, activeSector, setActiveSector
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-105"
+              preload={true}
             />
             <div className="absolute inset-0 flex flex-col justify-end p-[1.1rem] xl:p-[1.3rem] 2xl:p-6 text-white bg-linear-to-b from-transparent to-primary">
               <span className="text-[1.5rem] xl:text-[1.6rem] 2xl:text-[1.7rem] font-bold">

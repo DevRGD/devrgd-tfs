@@ -40,6 +40,7 @@ export default function Header() {
                 fill
                 sizes="130px"
                 className="brightness-0 invert object-contain"
+                preload={true}
               />
             </div>
           </Link>
