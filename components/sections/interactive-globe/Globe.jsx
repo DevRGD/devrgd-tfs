@@ -37,7 +37,7 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     if (gl.domElement) observer.observe(gl.domElement);
     return () => observer.disconnect();
@@ -60,10 +60,10 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
 
       const animState = { distance: currentDist };
       animTimeline.current = gsap.timeline({
-         onUpdate: () => {
-           camera.position.normalize().multiplyScalar(animState.distance);
-           if (controlsRef?.current) controlsRef.current.update();
-         }
+        onUpdate: () => {
+          camera.position.normalize().multiplyScalar(animState.distance);
+          if (controlsRef?.current) controlsRef.current.update();
+        },
       });
       animTimeline.current.to(animState, { distance: zoomOutDist, duration: 0.3, ease: 'power2.out' });
 
@@ -79,7 +79,7 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
           onUpdate: () => {
             tempPDir.copy(startPointerPos).lerp(targetDir, pState.t).normalize();
             pointerRef.current.position.copy(tempPDir).multiplyScalar(GLOBE_RADIUS);
-          }
+          },
         });
         pointerAnimTimeline.current.to(pState, { t: 1, duration: 0.2, ease: 'power1.out' });
       }
@@ -180,6 +180,23 @@ function ClosestCountryTracker({ isDragging, onClosestChange }) {
 
 function RotatingSphere({ activeLocation, pointerRef }) {
   const colorMap = useTexture('/images/earth.jpg');
+  const htmlWrapperRef = useRef(null);
+
+  useFrame(({ camera }) => {
+    if (pointerRef.current && htmlWrapperRef.current) {
+      const distance = camera.position.length();
+      const threshold = GLOBE_RADIUS / distance;
+      const pointDir = pointerRef.current.position.clone().normalize();
+      const cameraDir = camera.position.clone().normalize();
+      const dot = pointDir.dot(cameraDir);
+
+      if (dot < threshold - 0.05) {
+        htmlWrapperRef.current.style.opacity = '0';
+      } else {
+        htmlWrapperRef.current.style.opacity = '1';
+      }
+    }
+  });
 
   return (
     <group>
@@ -191,7 +208,10 @@ function RotatingSphere({ activeLocation, pointerRef }) {
       <group ref={pointerRef}>
         {activeLocation?.country && (
           <Html center>
-            <div className="text-rose-500 w-8 h-8 pointer-events-none drop-shadow-md -translate-y-4">
+            <div
+              ref={htmlWrapperRef}
+              className="text-rose-500 w-8 h-8 pointer-events-none drop-shadow-md -translate-y-4 transition-opacity duration-200"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
               </svg>
@@ -216,7 +236,12 @@ export default function Globe({ activeLocation, controlsRef, isDragging, onDragS
           <RotatingSphere activeLocation={activeLocation} pointerRef={pointerRef} />
         </Suspense>
 
-        <CameraController activeLocation={activeLocation} controlsRef={controlsRef} isDragging={isDragging} pointerRef={pointerRef} />
+        <CameraController
+          activeLocation={activeLocation}
+          controlsRef={controlsRef}
+          isDragging={isDragging}
+          pointerRef={pointerRef}
+        />
         <ClosestCountryTracker isDragging={isDragging} onClosestChange={onClosestChange} />
 
         <OrbitControls ref={controlsRef} enablePan={false} enableZoom={false} onStart={onDragStart} onEnd={onDragEnd} />
