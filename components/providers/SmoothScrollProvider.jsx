@@ -11,8 +11,6 @@ export default function SmoothScrollProvider({ children }) {
       history.scrollRestoration = 'manual';
     }
 
-    window.scrollTo(0, 0);
-
     function update(time) {
       lenisRef.current?.lenis?.raf(time * 1000);
     }

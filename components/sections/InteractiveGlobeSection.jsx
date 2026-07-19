@@ -3,7 +3,7 @@
 import CountryList from './interactive-globe/CountryList';
 import FacilityCard from './interactive-globe/FacilityCard';
 import Globe from './interactive-globe/Globe';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useInteractiveGlobeTransition } from '@/hooks/useInteractiveGlobeTransition';
 import { globeLocationsData } from '@/data/globeLocationsData';
 import { useGlobeContentTransition } from '@/hooks/useGlobeContentTransition';
@@ -19,11 +19,39 @@ if (typeof window !== 'undefined') {
 export default function InteractiveGlobeSection() {
   const sectionRef = useRef(null);
 
+  const controlsRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragClosestIndexRef = useRef(-1);
+  const dragTimeoutRef = useRef(null);
+
   useInteractiveGlobeTransition(sectionRef);
   const { targetIndex, displayedIndex, changeLocation } = useGlobeContentTransition(sectionRef);
 
   const handleNext = () => changeLocation((targetIndex + 1) % globeLocationsData.length);
   const handlePrev = () => changeLocation((targetIndex - 1 + globeLocationsData.length) % globeLocationsData.length);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
+    if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
+  };
+
+  const handleClosestChange = (idx) => {
+    dragClosestIndexRef.current = idx;
+    if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
+    dragTimeoutRef.current = setTimeout(() => {
+      if (idx !== targetIndex && isDragging) {
+        changeLocation(idx);
+      }
+    }, 400);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
+    if (dragClosestIndexRef.current !== -1 && dragClosestIndexRef.current !== targetIndex) {
+      changeLocation(dragClosestIndexRef.current);
+    }
+  };
 
   return (
     <section
@@ -45,7 +73,14 @@ export default function InteractiveGlobeSection() {
           <FacilityCard activeData={globeLocationsData[displayedIndex]} onNext={handleNext} onPrev={handlePrev} />
 
           <div className="w-full lg:w-[60%] xl:w-[65%] flex justify-center items-center relative z-10">
-            <Globe activeLocation={globeLocationsData[displayedIndex]} />
+            <Globe
+              activeLocation={globeLocationsData[targetIndex]}
+              controlsRef={controlsRef}
+              isDragging={isDragging}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onClosestChange={handleClosestChange}
+            />
           </div>
         </div>
       </div>

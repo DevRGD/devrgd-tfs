@@ -1,9 +1,11 @@
 'use client';
 
-import { useRef, useEffect, Suspense } from 'react';
+import { useRef, useEffect, Suspense, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useTexture, Html } from '@react-three/drei';
+import { useTexture, Html, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import gsap from 'gsap';
+import { globeLocationsData } from '@/data/globeLocationsData';
 
 const GLOBE_RADIUS = 2.2;
 const CAMERA_ZOOM_DISTANCE = 5.5;
@@ -19,25 +21,117 @@ export function convertLatLngToVector3(lat, lng, radius) {
   );
 }
 
-function CameraController({ activeLocation }) {
-  const { camera } = useThree();
-  const targetPositionRef = useRef(null);
+function CameraController({ activeLocation, controlsRef, isDragging, pointerRef }) {
+  const { camera, size, gl } = useThree();
+  const isFirstRun = useRef(true);
+  const animTimeline = useRef(null);
+  const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
-    if (activeLocation?.country) {
-      const baseVector = convertLatLngToVector3(activeLocation.country.lat, activeLocation.country.lng, GLOBE_RADIUS);
-      const targetCameraPos = baseVector.clone().normalize().multiplyScalar(CAMERA_ZOOM_DISTANCE);
-      targetPositionRef.current = targetCameraPos;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (gl.domElement) observer.observe(gl.domElement);
+    return () => observer.disconnect();
+  }, [gl.domElement]);
+
+  useEffect(() => {
+    if (!isInView || !activeLocation?.country || isDragging) return;
+
+    if (animTimeline.current) {
+      animTimeline.current.kill();
     }
-  }, [activeLocation]);
+
+    const aspect = size.width / size.height;
+    const zoomOutDist = aspect < 1 ? 6.5 / Math.sqrt(aspect) : 6.5;
+    const zoomInDist = aspect < 1 ? 3.55 / Math.sqrt(aspect) : 3.55;
+    const baseVector = convertLatLngToVector3(activeLocation.country.lat, activeLocation.country.lng, GLOBE_RADIUS);
+    const targetDir = baseVector.clone().normalize();
+    const currentDir = camera.position.clone().normalize();
+    const currentDist = camera.position.length();
+
+    let startPointerPos = targetDir.clone();
+    if (pointerRef?.current && pointerRef.current.position.lengthSq() > 0.1) {
+      startPointerPos = pointerRef.current.position.clone().normalize();
+    } else if (pointerRef?.current) {
+      pointerRef.current.position.copy(targetDir).multiplyScalar(GLOBE_RADIUS);
+    }
+
+    const animState = {
+      t: 0,
+      pointerT: 0,
+      distance: currentDist,
+    };
+
+    const tempDir = new THREE.Vector3();
+    const tempPointerDir = new THREE.Vector3();
+
+    animTimeline.current = gsap.timeline({
+      onUpdate: () => {
+        tempDir.copy(currentDir).lerp(targetDir, animState.t).normalize();
+        camera.position.copy(tempDir).multiplyScalar(animState.distance);
+        camera.lookAt(0, 0, 0);
+        if (controlsRef?.current) controlsRef.current.update();
+
+        if (pointerRef?.current) {
+          tempPointerDir.copy(startPointerPos).lerp(targetDir, animState.pointerT).normalize();
+          pointerRef.current.position.copy(tempPointerDir).multiplyScalar(GLOBE_RADIUS);
+        }
+      },
+    });
+
+    const distanceToTarget = currentDir.distanceTo(targetDir);
+
+    if (distanceToTarget < 0.2) {
+      animTimeline.current.to(animState, { t: 1, pointerT: 1, duration: 0.5, ease: 'power2.inOut' });
+      animTimeline.current.to(animState, { distance: zoomInDist, duration: 0.5, ease: 'power2.out' }, '>');
+    } else if (isFirstRun.current) {
+      animTimeline.current.to(animState, { t: 1, pointerT: 1, duration: 1.5, ease: 'power3.out' });
+      animTimeline.current.to(animState, { distance: zoomInDist, duration: 1.5, ease: 'power3.out' }, '<');
+      isFirstRun.current = false;
+    } else {
+      animTimeline.current.to(animState, { distance: zoomOutDist, duration: 0.5, ease: 'power2.out' });
+      animTimeline.current.to(animState, { t: 1, duration: 0.8, ease: 'power2.inOut' }, '>');
+      animTimeline.current.to(animState, { pointerT: 1, duration: 0.6, ease: 'power2.inOut' }, '>');
+      animTimeline.current.to(animState, { distance: zoomInDist, duration: 0.6, ease: 'power2.inOut' }, '>');
+    }
+
+    return () => {
+      if (animTimeline.current) animTimeline.current.kill();
+    };
+  }, [activeLocation, isDragging, size, camera, controlsRef, isInView, pointerRef]);
+
+  return null;
+}
+
+function ClosestCountryTracker({ isDragging, onClosestChange }) {
+  const { camera } = useThree();
+  const currentClosest = useRef(-1);
 
   useFrame(() => {
-    if (targetPositionRef.current) {
-      camera.position.lerp(targetPositionRef.current, 0.05);
-      camera.lookAt(0, 0, 0);
+    if (isDragging) {
+      let closestIdx = 0;
+      let minDistance = Infinity;
 
-      if (camera.position.distanceTo(targetPositionRef.current) < 0.005) {
-        targetPositionRef.current = null;
+      for (let i = 0; i < globeLocationsData.length; i++) {
+        const item = globeLocationsData[i];
+        const pos = convertLatLngToVector3(item.country.lat, item.country.lng, GLOBE_RADIUS);
+        const dist = camera.position.distanceTo(pos);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = i;
+        }
+      }
+
+      if (closestIdx !== currentClosest.current) {
+        currentClosest.current = closestIdx;
+        onClosestChange(closestIdx);
       }
     }
   });
@@ -45,7 +139,7 @@ function CameraController({ activeLocation }) {
   return null;
 }
 
-function RotatingSphere({ activeLocation }) {
+function RotatingSphere({ activeLocation, pointerRef }) {
   const colorMap = useTexture('/images/earth.jpg');
 
   return (
@@ -55,34 +149,38 @@ function RotatingSphere({ activeLocation }) {
         <meshStandardMaterial map={colorMap} roughness={0.7} metalness={0.1} />
       </mesh>
 
-      {activeLocation?.country && (
-        <Html
-          position={convertLatLngToVector3(activeLocation.country.lat, activeLocation.country.lng, GLOBE_RADIUS)}
-          center
-        >
-          <div className="text-rose-500 w-8 h-8 pointer-events-none drop-shadow-md -translate-y-4">
-            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-          </div>
-        </Html>
-      )}
+      <group ref={pointerRef}>
+        {activeLocation?.country && (
+          <Html center>
+            <div className="text-rose-500 w-8 h-8 pointer-events-none drop-shadow-md -translate-y-4">
+              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+            </div>
+          </Html>
+        )}
+      </group>
     </group>
   );
 }
 
-export default function Globe({ activeLocation }) {
+export default function Globe({ activeLocation, controlsRef, isDragging, onDragStart, onDragEnd, onClosestChange }) {
+  const pointerRef = useRef(null);
+
   return (
-    <div className="relative w-full h-100 lg:h-125 xl:h-150 cursor-grab active:cursor-grabbing">
+    <div className={`relative w-full h-100 lg:h-125 xl:h-150 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
       <Canvas camera={{ position: [0, 0, CAMERA_ZOOM_DISTANCE], fov: 50 }}>
         <ambientLight intensity={1} />
         <directionalLight position={[10, 10, 10]} intensity={1.5} />
 
         <Suspense fallback={null}>
-          <RotatingSphere activeLocation={activeLocation} />
+          <RotatingSphere activeLocation={activeLocation} pointerRef={pointerRef} />
         </Suspense>
 
-        <CameraController activeLocation={activeLocation} />
+        <CameraController activeLocation={activeLocation} controlsRef={controlsRef} isDragging={isDragging} pointerRef={pointerRef} />
+        <ClosestCountryTracker isDragging={isDragging} onClosestChange={onClosestChange} />
+
+        <OrbitControls ref={controlsRef} enablePan={false} enableZoom={false} onStart={onDragStart} onEnd={onDragEnd} />
       </Canvas>
     </div>
   );
