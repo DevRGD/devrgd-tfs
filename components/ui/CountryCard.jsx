@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-export default function CountryCard({ name, image, priority = false, textPos = 'right' }) {
+export default function CountryCard({ name, image, preload = false, textPos = 'right' }) {
   return (
     <div className={`country-card relative overflow-hidden cursor-pointer w-[150px] md:w-[200px] shrink-0 aspect-[3/2]`}>
       <Image
@@ -9,7 +9,7 @@ export default function CountryCard({ name, image, priority = false, textPos = '
         fill
         sizes="280px"
         className="object-cover scale-[1.15]"
-        priority={priority}
+        preload={preload}
       />
       <div 
         className={`absolute bottom-0 w-full px-3 py-1.5 md:px-4 md:py-2 flex ${

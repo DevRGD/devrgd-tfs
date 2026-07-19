@@ -130,7 +130,7 @@ export default function InteractiveGlobeSection() {
       <div className="absolute bottom-0 left-0 w-full h-1/2 bg-[#f6f6f6] z-0"></div>
 
       <div className="container mx-auto px-6 md:px-12 lg:px-16 xl:px-24 relative z-10 py-6 md:py-8">
-        <div className="flex flex-col-reverse lg:flex-row items-center gap-10 lg:gap-12 xl:gap-16">
+        <div className="flex flex-col-reverse lg:flex-row items-center lg:items-stretch gap-10 lg:gap-12 xl:gap-16">
           <FacilityCard activeData={globeLocationsData[displayedIndex]} onNext={handleNext} onPrev={handlePrev} />
 
           <div className="w-full lg:w-[60%] xl:w-[65%] flex justify-center items-center relative z-10">

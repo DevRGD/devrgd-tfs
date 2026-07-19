@@ -24,13 +24,15 @@ export default function MegaMenu({ isMegaMenuOpen, activeSector, setActiveSector
             <ul className="mt-[1.6rem] xl:mt-[1.8rem] 2xl:mt-8">
               {brands.map((logo, i, arr) => (
                 <li key={i} className={i === arr.length - 1 ? '' : 'mb-2'}>
-                  <Image
-                    src={`/logos/${logo}`}
-                    alt="Brand"
-                    width={140}
-                    height={50}
-                    className="w-[55%] h-auto mix-blend-multiply"
-                  />
+                  <div className="relative w-[55%]" style={{ aspectRatio: '14/5' }}>
+                    <Image
+                      src={`/logos/${logo}`}
+                      alt={logo.replace('.png', '').replace(/-/g, ' ')}
+                      fill
+                      sizes="80px"
+                      className="object-contain mix-blend-multiply"
+                    />
+                  </div>
                 </li>
               ))}
             </ul>

@@ -6,14 +6,16 @@ export default function TopBar() {
     <header className="hidden lg:flex justify-between items-center">
       <div>
         <Link href="/" className="block w-25 sm:w-50 lg:w-47.5 xl:w-53.75 2xl:w-60">
-          <Image
-            src="/logos/logo.png"
-            alt="Tandhan Group Logo"
-            width={240}
-            height={60}
-            priority
-            className="w-full h-full brightness-0 invert object-contain"
-          />
+          <div className="relative w-full" style={{ aspectRatio: '4/1' }}>
+            <Image
+              src="/logos/logo.png"
+              alt="Tandhan Group Logo"
+              fill
+              sizes="(max-width: 640px) 100px, (max-width: 1024px) 200px, 240px"
+              preload={true}
+              className="brightness-0 invert object-contain"
+            />
+          </div>
         </Link>
       </div>
       <div className="flex gap-8 sm:gap-[1.7rem] lg:gap-[1.6rem] xl:gap-[1.8rem] 2xl:gap-8">

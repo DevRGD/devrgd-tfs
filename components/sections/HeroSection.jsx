@@ -24,7 +24,7 @@ export default function HeroSection() {
           src="/banners/banner.png"
           fill
           className="object-cover opacity-40 mix-blend-overlay"
-          priority
+          preload={true}
         />
       </div>
       <div className="relative z-10 w-full flex-1 flex flex-col justify-between gap-12">

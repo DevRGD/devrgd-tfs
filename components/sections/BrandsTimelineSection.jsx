@@ -87,7 +87,6 @@ export default function BrandsTimelineSection() {
                       fill
                       sizes="128px"
                       className="object-contain"
-                      style={{ objectFit: 'contain' }}
                     />
                   </div>
                 </div>

@@ -6,7 +6,7 @@ export default function HeroMarquees({ topRow, bottomRow }) {
       <div className="marquee-top-wrapper w-full overflow-hidden">
         <div className="marquee-top flex gap-4 w-max">
           {[...topRow, ...topRow].map((c, i) => (
-            <CountryCard key={`top-${i}`} {...c} priority={i < 5} />
+            <CountryCard key={`top-${i}`} {...c} preload={i < 5} />
           ))}
         </div>
       </div>

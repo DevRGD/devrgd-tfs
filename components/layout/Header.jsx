@@ -33,13 +33,15 @@ export default function Header() {
       <div className="flex flex-wrap items-center justify-between gap-y-4 mt-[0.2rem] lg:mt-[1.6rem] xl:mt-[1.8rem] 2xl:mt-8">
         <div className="block lg:hidden w-32.5">
           <Link href="/" className="block w-full">
-            <Image
-              src="/logos/logo.png"
-              alt="Tandhan Group Logo"
-              width={130}
-              height={32}
-              className="w-full h-full brightness-0 invert object-contain"
-            />
+            <div className="relative w-full" style={{ aspectRatio: '130/32' }}>
+              <Image
+                src="/logos/logo.png"
+                alt="Tandhan Group Logo"
+                fill
+                sizes="130px"
+                className="brightness-0 invert object-contain"
+              />
+            </div>
           </Link>
         </div>
         <DesktopNav

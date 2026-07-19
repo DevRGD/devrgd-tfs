@@ -6,7 +6,7 @@ export default function FacilityCard({ activeData, onNext, onPrev }) {
   const { country, facility } = activeData;
 
   return (
-    <div className="w-full lg:w-[40%] xl:w-[35%] bg-white border border-gray-200 shadow-sm relative flex flex-col z-20 anim-slide-right opacity-0">
+    <div className="w-full lg:w-[40%] xl:w-[35%] lg:h-full bg-white border border-gray-200 shadow-sm relative flex flex-col z-20 anim-slide-right opacity-0">
       <div className="relative w-full h-48 md:h-56 lg:h-64 border-b border-gray-200">
         <div className="dynamic-content w-full h-full relative">
           <Image
@@ -15,12 +15,18 @@ export default function FacilityCard({ activeData, onNext, onPrev }) {
             fill
             sizes="(max-width: 1024px) 100vw, 35vw"
             className="object-cover"
+            preload={true}
+            loading="eager"
           />
         </div>
         <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/40 to-transparent"></div>
         <div className="absolute bottom-0 left-0 w-full p-6 flex flex-col">
-          <h3 className="dynamic-content text-white text-3xl md:text-4xl font-medium mb-2 leading-none">{country.name}</h3>
-          <p className="dynamic-content text-white/90 text-xs leading-relaxed max-w-[90%] font-light">{country.description}</p>
+          <h3 className="dynamic-content text-white text-3xl md:text-4xl font-medium mb-2 leading-none">
+            {country.name}
+          </h3>
+          <p className="dynamic-content text-white/90 text-xs leading-relaxed max-w-[90%] font-light">
+            {country.description}
+          </p>
         </div>
       </div>
 
@@ -30,16 +36,15 @@ export default function FacilityCard({ activeData, onNext, onPrev }) {
             {facility.name}
           </h4>
           <p className="dynamic-content text-[0.85rem] text-black leading-relaxed font-light">
-            {facility.address.split(',').map((part, i) => (
+            {facility.address.split(',').map((part, i, arr) => (
               <span key={i}>
                 {part.trim()}
-                {i < facility.address.split(',').length - 1 && ','}
-                {i % 2 !== 0 && <br className="hidden md:block" />}
+                {i < arr.length - 1 && ','}
+                {i < arr.length - 1 && <br />}
               </span>
             ))}
           </p>
         </div>
-
       </div>
 
       <div className="absolute bottom-0 right-0 flex">
