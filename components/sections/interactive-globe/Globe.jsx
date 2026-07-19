@@ -25,7 +25,9 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
   const { camera, size, gl } = useThree();
   const isFirstRun = useRef(true);
   const animTimeline = useRef(null);
+  const pointerAnimTimeline = useRef(null);
   const [isInView, setIsInView] = useState(false);
+  const prevIsDragging = useRef(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -42,11 +44,7 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
   }, [gl.domElement]);
 
   useEffect(() => {
-    if (!isInView || !activeLocation?.country || isDragging) return;
-
-    if (animTimeline.current) {
-      animTimeline.current.kill();
-    }
+    if (!isInView || !activeLocation?.country) return;
 
     const aspect = size.width / size.height;
     const zoomOutDist = aspect < 1 ? 6.5 / Math.sqrt(aspect) : 6.5;
@@ -55,6 +53,42 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
     const targetDir = baseVector.clone().normalize();
     const currentDir = camera.position.clone().normalize();
     const currentDist = camera.position.length();
+
+    if (isDragging) {
+      prevIsDragging.current = true;
+      if (animTimeline.current) animTimeline.current.kill();
+
+      const animState = { distance: currentDist };
+      animTimeline.current = gsap.timeline({
+         onUpdate: () => {
+           camera.position.normalize().multiplyScalar(animState.distance);
+           if (controlsRef?.current) controlsRef.current.update();
+         }
+      });
+      animTimeline.current.to(animState, { distance: zoomOutDist, duration: 0.3, ease: 'power2.out' });
+
+      if (pointerRef?.current) {
+        if (pointerAnimTimeline.current) pointerAnimTimeline.current.kill();
+        let startPointerPos = targetDir.clone();
+        if (pointerRef.current.position.lengthSq() > 0.1) {
+          startPointerPos = pointerRef.current.position.clone().normalize();
+        }
+        const pState = { t: 0 };
+        const tempPDir = new THREE.Vector3();
+        pointerAnimTimeline.current = gsap.timeline({
+          onUpdate: () => {
+            tempPDir.copy(startPointerPos).lerp(targetDir, pState.t).normalize();
+            pointerRef.current.position.copy(tempPDir).multiplyScalar(GLOBE_RADIUS);
+          }
+        });
+        pointerAnimTimeline.current.to(pState, { t: 1, duration: 0.2, ease: 'power1.out' });
+      }
+
+      return;
+    }
+
+    if (animTimeline.current) animTimeline.current.kill();
+    if (pointerAnimTimeline.current) pointerAnimTimeline.current.kill();
 
     let startPointerPos = targetDir.clone();
     if (pointerRef?.current && pointerRef.current.position.lengthSq() > 0.1) {
@@ -88,13 +122,17 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
 
     const distanceToTarget = currentDir.distanceTo(targetDir);
 
-    if (distanceToTarget < 0.2) {
-      animTimeline.current.to(animState, { t: 1, pointerT: 1, duration: 0.5, ease: 'power2.inOut' });
-      animTimeline.current.to(animState, { distance: zoomInDist, duration: 0.5, ease: 'power2.out' }, '>');
-    } else if (isFirstRun.current) {
+    if (isFirstRun.current) {
       animTimeline.current.to(animState, { t: 1, pointerT: 1, duration: 1.5, ease: 'power3.out' });
       animTimeline.current.to(animState, { distance: zoomInDist, duration: 1.5, ease: 'power3.out' }, '<');
       isFirstRun.current = false;
+    } else if (prevIsDragging.current) {
+      animTimeline.current.to(animState, { t: 1, pointerT: 1, duration: 0.6, ease: 'power2.out' });
+      animTimeline.current.to(animState, { distance: zoomInDist, duration: 0.6, ease: 'power2.out' }, '<');
+      prevIsDragging.current = false;
+    } else if (distanceToTarget < 0.2) {
+      animTimeline.current.to(animState, { t: 1, pointerT: 1, duration: 0.5, ease: 'power2.inOut' });
+      animTimeline.current.to(animState, { distance: zoomInDist, duration: 0.5, ease: 'power2.out' }, '>');
     } else {
       animTimeline.current.to(animState, { distance: zoomOutDist, duration: 0.5, ease: 'power2.out' });
       animTimeline.current.to(animState, { t: 1, duration: 0.8, ease: 'power2.inOut' }, '>');
@@ -104,6 +142,7 @@ function CameraController({ activeLocation, controlsRef, isDragging, pointerRef 
 
     return () => {
       if (animTimeline.current) animTimeline.current.kill();
+      if (pointerAnimTimeline.current) pointerAnimTimeline.current.kill();
     };
   }, [activeLocation, isDragging, size, camera, controlsRef, isInView, pointerRef]);
 

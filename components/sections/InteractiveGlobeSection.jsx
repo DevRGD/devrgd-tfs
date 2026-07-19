@@ -42,7 +42,7 @@ export default function InteractiveGlobeSection() {
       if (idx !== targetIndex && isDragging) {
         changeLocation(idx);
       }
-    }, 400);
+    }, 20);
   };
 
   const handleDragEnd = () => {
